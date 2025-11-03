@@ -5,7 +5,8 @@ DROP TABLE IF EXISTS Categories;
 
 CREATE TABLE Users (
     user_id SERIAL PRIMARY KEY,
-    name VARCHAR(30) NOT NULL
+    name VARCHAR(30) NOT NULL,
+    user_type VARCHAR(10) DEFAULT 'normal' CHECK (user_type IN ('admin','normal'))
 );
 
 CREATE TABLE Categories (
@@ -175,9 +176,11 @@ LIMIT 1;
 -- vi) Write a query to select article which does not have more than one comment by the same user ( do this using left join and group by )
 SELECT 
     a.article_id,
-    c.comment_id,
     c.user_id,
-    c.context
-FROM articles a
-FULL JOIN comments c
-ON a.article_id = c.article_id;
+    COUNT(c.comment_id)
+FROM comments c
+LEFT JOIN articles a
+ON a.article_id = c.article_id
+GROUP BY a.article_id, c.user_id
+HAVING COUNT(c.comment_id) <= 1
+ORDER BY a.article_id;
