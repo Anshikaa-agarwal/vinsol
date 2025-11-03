@@ -1,0 +1,7 @@
+CREATE DATABASE vtapp;
+-- \c vtapp
+CREATE ROLE vtapp_user WITH LOGIN PASSWORD 'user@123';
+CREATE ROLE manager WITH LOGIN PASSWORD 'manager123';
+
+GRANT CREATE, TEMPORARY ON DATABASE vtapp TO vtapp_user;
+GRANT ALL ON DATABASE vtapp TO manager;
