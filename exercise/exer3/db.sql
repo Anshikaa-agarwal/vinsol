@@ -3,15 +3,20 @@ DROP TABLE IF EXISTS Articles;
 DROP TABLE IF EXISTS Comments;
 DROP TABLE IF EXISTS Categories;
 
+-- i) manage(create, update, delete) categories, articles, comments, and users
+
+CREATE TYPE user_role AS ENUM ('admin', 'normal');
+
+-- CREATING TABLES
 CREATE TABLE Users (
-    user_id SERIAL PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     name VARCHAR(30) NOT NULL,
-    user_type VARCHAR(10) DEFAULT 'normal' CHECK (user_type IN ('admin','normal'))
+    role user_role DEFAULT 'normal'
 );
 
 CREATE TABLE Categories (
     category_id SERIAL PRIMARY KEY,
-    name VARCHAR(30)
+    name VARCHAR(30) NOT NULL
 );
 
 CREATE TABLE Articles (
@@ -22,7 +27,7 @@ CREATE TABLE Articles (
     category_id INT,
 
     CONSTRAINT fk_users
-        FOREIGN KEY (author_id) REFERENCES Users(user_id)
+        FOREIGN KEY (author_id) REFERENCES Users(id)
         ON DELETE CASCADE,
 
     CONSTRAINT fk_categories
@@ -32,12 +37,12 @@ CREATE TABLE Articles (
 
 CREATE TABLE Comments (
     comment_id SERIAL PRIMARY KEY,
-    user_id INT,
+    id INT,
     article_id INT,
-    context TEXT,
+    context TEXT NOT NULL,
 
     CONSTRAINT fk_users
-        FOREIGN KEY (user_id) REFERENCES Users(user_id)
+        FOREIGN KEY (id) REFERENCES Users(id)
         ON DELETE CASCADE,
     
     CONSTRAINT fk_articles
@@ -74,7 +79,7 @@ VALUES
 ('Tech Startups to Watch', 3, 1);
 
 
-INSERT INTO Comments (user_id, article_id, context)
+INSERT INTO Comments (id, article_id, context)
 VALUES
 (1, 1, 'Great article!'),
 (2, 1, 'Very informative.'),
@@ -89,8 +94,16 @@ VALUES
 (3, 7, 'Can’t wait for more!');
 
 
--- \set author_name 'User3'
+-- Delete som values
+DELETE FROM Comments
+WHERE article_id = 4;
 
+-- Update
+ALTER TABLE Comments
+ADD CONSTRAINT check_length CHECK (length(context) < 500);
+
+-- ii) select all articles whose author's name is user3
+-- \set author_name 'User3'
 SELECT 
     a.article_id, 
     a.title, 
@@ -98,7 +111,7 @@ SELECT
     u.name AS author_name 
 FROM articles a
 INNER JOIN users u
-ON a.author_id = u.user_id
+ON a.author_id = u.id
 WHERE u.name = 'User3';
 -- WHERE u.name = :'author_name';
 
@@ -108,12 +121,9 @@ WHERE u.name = 'User3';
 SELECT 
     a.article_id, 
     a.title, 
-    a.author_id, 
-    u.name AS author_name,
-    c.user_id AS commentor_id,
     c.context
 FROM articles a
-INNER JOIN users u ON a.author_id = u.user_id
+INNER JOIN users u ON a.author_id = u.id
 LEFT JOIN comments c ON c.article_id = A.article_id
 WHERE u.name = 'User3';
 
@@ -129,7 +139,7 @@ SELECT
         LIMIT 1
     ) AS id_context
 FROM articles a 
-WHERE a.author_id = (SELECT user_id FROM Users WHERE name = 'User3');
+WHERE a.author_id = (SELECT id FROM Users WHERE name = 'User3');
 
 -- iv) (Joins) Write a query to select all articles which do not have any comments
 SELECT DISTINCT * FROM Articles a
@@ -176,11 +186,11 @@ LIMIT 1;
 -- vi) Write a query to select article which does not have more than one comment by the same user ( do this using left join and group by )
 SELECT 
     a.article_id,
-    c.user_id,
+    c.id,
     COUNT(c.comment_id)
 FROM comments c
 LEFT JOIN articles a
 ON a.article_id = c.article_id
-GROUP BY a.article_id, c.user_id
+GROUP BY a.article_id, c.id
 HAVING COUNT(c.comment_id) <= 1
 ORDER BY a.article_id;
