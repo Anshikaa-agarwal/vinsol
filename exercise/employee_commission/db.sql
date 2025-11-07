@@ -68,13 +68,9 @@ WITH total_commissions AS (
     ON e.id = c.employee_id
     GROUP BY e.id
 )
-SELECT e.*, tc.total_commission
-FROM Employees e
-LEFT JOIN total_commissions tc
-ON e.id = tc.id
-WHERE tc.total_commission = (
-    SELECT MAX(total_commission) 
-    FROM total_commissions
+SELECT * FROM total_commissions
+WHERE total_commission = (
+    SELECT MAX(total_commission) FROM total_commissions
 );
 
 -- ii. Find employee with 4th Highest salary from employee table.
@@ -95,19 +91,15 @@ LIMIT 1;
 WITH dept_commission AS (
     SELECT 
         e.department_id,
-        SUM(c.commission_amt) AS sum
+        SUM(c.commission_amt) AS total_commission
     FROM Employees e
     LEFT JOIN Commissions c
     ON e.id = c.employee_id
     GROUP BY e.department_id
 )
-SELECT * FROM Departments d
-WHERE d.id = (
-    SELECT department_id FROM dept_commission
-    WHERE sum = (
-        SELECT MAX(sum) FROM dept_commission
-    )
-);
+SELECT * FROM dept_commission
+ORDER BY total_commission DESC
+LIMIT 1;
 
 -- iv. Find employees getting commission more than 3000
     -- Display Output in following pattern:  
