@@ -3,10 +3,9 @@ DROP TABLE IF EXISTS Projects CASCADE;
 DROP TABLE IF EXISTS Enrollments CASCADE; 
 DROP TABLE IF EXISTS ProjectSkills CASCADE; 
 
-
 CREATE TABLE Employees (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(30)
+    name VARCHAR(30) NOT NULL
 );
 
 CREATE TABLE Projects (
@@ -110,10 +109,14 @@ LEFT JOIN Enrollments en
 WHERE en.emp_id IS NULL;
 
 -- 2) Find all employees who have exposure to HTML, Javascript and IOS.
-SELECT DISTINCT e.emp_id, p.skill FROM enrollments e
-LEFT JOIN projectskills p ON e.project_id = p.project_id
-WHERE p.skill IN ('HTML', 'Javascript', 'IOS')
-ORDER BY e.emp_id;
+SELECT e.emp_id
+FROM Enrollments e
+JOIN ProjectSkills ps ON e.project_id = ps.project_id
+WHERE ps.skill IN ('HTML', 'Javascript', 'IOS')
+GROUP BY e.emp_id
+HAVING COUNT(DISTINCT ps.skill) = 3;
+
+
 
 -- 3) Find the technologies in which a particular employee(Say B) has expertise(3 or more projects)
 SELECT ps.skill FROM enrollments e
