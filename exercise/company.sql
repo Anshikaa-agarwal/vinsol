@@ -108,6 +108,7 @@ CREATE INDEX idx_projectskills_project_id ON ProjectSkills(project_id);
 CREATE INDEX idx_enrollments_status_ongoing
 ON Enrollments(status)
 WHERE status = 'ongoing';
+
 CREATE INDEX idx_projectskills_skill ON ProjectSkills(skill);
 
 -- 1) Find names of all employees currently not working in any projects. (Use joins)
