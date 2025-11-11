@@ -1,5 +1,7 @@
 -- DROP previously made tables in db
-DROP TABLE IF EXISTS Friends;
+DROP TABLE IF EXISTS Tags CASCADE;
+DROP TABLE IF EXISTS Images CASCADE;
+DROP TABLE IF EXISTS Friends CASCADE;
 DROP TABLE IF EXISTS Users CASCADE;
 
 -- Create tables
@@ -14,6 +16,8 @@ CREATE TABLE Users (
 CREATE TABLE IF NOT EXISTS Friends (
     user_id INT,
     friend_id INT,
+
+    PRIMARY KEY(user_id, friend_id),
 
     CONSTRAINT fk_users
         FOREIGN KEY (user_id) REFERENCES Users(id)
@@ -36,7 +40,7 @@ CREATE TABLE IF NOT EXISTS Images (
 CREATE TABLE Tags (
     image_id INT,
     tagged_user INT,
-
+    
     FOREIGN KEY (image_id) REFERENCES Images(id) ON DELETE CASCADE,
     FOREIGN KEY (tagged_user) REFERENCES Users(id) ON DELETE CASCADE
 );
@@ -85,12 +89,18 @@ INSERT INTO Tags (image_id, tagged_user) VALUES
 (9, 5), (9, 5), (9, 5),
 (10, 1), (10, 2);
 
-
 -- View data
 SELECT * FROM Users;
 SELECT * FROM friends;
 SELECT * FROM images;
 SELECT * FROM tags;
+
+-- Creating indexes
+CREATE INDEX idx_users_name_hash ON Users USING HASH (name);
+CREATE INDEX idx_friends_friend ON Friends(friend_id);
+CREATE INDEX idx_images_user ON Images(image_user);
+CREATE INDEX idx_tags_image ON Tags(image_id);
+CREATE INDEX idx_tags_tagged_user ON Tags(tagged_user);
 
 -- 1) Find image that has been tagged most no of times.
 WITH ranked_tb AS (
@@ -110,14 +120,13 @@ WHERE rank = 1;
 -- (let's say user is 'Bob')
 
 SELECT 
-    DISTINCT
     f.user_id,
     f.friend_id,
-    i.id as image_id
-FROM friends f
-LEFT JOIN images i ON f.friend_id = i.image_user
-WHERE f.user_id = (SELECT id FROM Users u WHERE u.name = 'Bob')
-ORDER BY f.friend_id;
+    i.id AS image_id
+FROM Friends f
+JOIN Images i ON f.friend_id = i.image_user
+WHERE f.user_id = (SELECT id FROM Users WHERE name = 'Bob')
+ORDER BY f.friend_id, i.id;
 
 -- To list entire table, i.e, all images of all friends of all users:
 SELECT 
