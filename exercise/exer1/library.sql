@@ -1,7 +1,7 @@
 -- DROP IF ALREADY EXISTS
-DROP TABLE IF EXISTS Holdings;
-DROP TABLE IF EXISTS Titles;
-DROP TABLE IF EXISTS Branch;
+DROP TABLE IF EXISTS Holdings CASCADE;
+DROP TABLE IF EXISTS Titles CASCADE;
+DROP TABLE IF EXISTS Branch CASCADE;
 
 -- CREATE TABLES
 CREATE TABLE IF NOT EXISTS Branch (
@@ -59,26 +59,20 @@ SELECT title FROM Titles
 WHERE publisher = 'Macmillan';
 
 -- (ii) branches that hold any books by Ann Brown (nested subquery).
-SELECT * FROM Branch 
-WHERE bcode IN (
-    SELECT DISTINCT branch FROM Holdings 
-    WHERE title IN (
-        SELECT title FROM Titles 
-        WHERE author = 'Ann Brown'
-    )   
+SELECT DISTINCT branch FROM Holdings 
+WHERE title IN (
+    SELECT title FROM Titles 
+    WHERE author = 'Ann Brown'
 );
 
 -- (iii) branches that hold any books by Ann Brown (without nested subquery).
-SELECT DISTINCT b.* FROM Branch b
-LEFT JOIN (
-    SELECT * FROM Holdings h
-    RIGHT JOIN (
-        SELECT * FROM Titles  
-        WHERE author = 'Ann Brown'
-    ) AS books
-    ON h.title = books.title
-) AS matched
-ON b.bcode = matched.branch;
+SELECT DISTINCT h.branch FROM Holdings h
+RIGHT JOIN (
+    SELECT * FROM Titles  
+    WHERE author = 'Ann Brown'
+) AS books
+ON h.title = books.title;
+
 
 -- (iv) Total number of books held at each branch
 SELECT branch, SUM(copies) FROM Holdings
