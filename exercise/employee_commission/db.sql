@@ -1,6 +1,6 @@
-DROP TABLE IF EXISTS Departments;
-DROP TABLE IF EXISTS Employees;
-DROP TABLE IF EXISTS Commissions;
+DROP TABLE IF EXISTS Departments CASCADE;
+DROP TABLE IF EXISTS Employees CASCADE;
+DROP TABLE IF EXISTS Commissions CASCADE;
 
 CREATE TABLE Departments (
     id SERIAL PRIMARY KEY,
@@ -24,7 +24,7 @@ CREATE TABLE Commissions (
     commission_amt NUMERIC,
 
     CONSTRAINT fk_employees
-     FOREIGN KEY (employee_id) REFERENCES Employees(id)
+     FOREIGN KEY (employee_id) REFERENCES employees (id)
      ON DELETE CASCADE
 );
 
@@ -45,7 +45,6 @@ VALUES
     ('Albie Morkel', 650000, 2),
     ('Wasim Akram', 750000, 3);
 
-
 INSERT INTO Commissions (employee_id, commission_amt)
 VALUES
     (1, 5000),
@@ -56,6 +55,8 @@ VALUES
     (4, 2000),
     (5, 1000),
     (6, 5000);
+
+DELETE FROM Employees RETURNING *;
 
 -- i. Find the employee who gets the highest total commission.
 WITH total_commissions AS (
@@ -102,7 +103,7 @@ ORDER BY total_commission DESC
 LIMIT 1;
 
 -- iv. Find employees getting commission more than 3000
-    -- Display Output in following pattern:  
+    -- Display Output in following pattern
     --   Chris Gayle, Rahul Dravid  4000
 
 SELECT 
