@@ -56,29 +56,21 @@ INSERT INTO Sandwiches VALUES
 ('Old Nag', 'Rye', 'Ham', 1.40);
 
 -- (i)
--- Find corresponding locations
-SELECT * FROM Locations
-WHERE lname in (
-    -- Find location from sandwich where we can find that filling
-    SELECT DISTINCT location FROM Sandwiches
-    WHERE filling = (
-        -- Find what filling 'Jones' likes
-        SELECT filling FROM Tastes 
-        WHERE name = 'Jones'
-    )
+
+SELECT DISTINCT location FROM Sandwiches
+WHERE filling = (
+    -- Find what filling 'Jones' likes
+    SELECT filling FROM Tastes 
+    WHERE name = 'Jones'
 );
 
 -- (ii)
--- find details about those locations
-SELECT l.* FROM Locations l
-JOIN (
-    -- Find locations where filling that jones like is available
-    SELECT * FROM Tastes t
-    JOIN Sandwiches s
-    ON t.filling = s.filling
-    WHERE t.name = 'Jones'
-) AS j
-ON l.lname = j.location;
+
+SELECT DISTINCT s.location FROM Tastes t
+JOIN Sandwiches s
+ON t.filling = s.filling
+WHERE t.name = 'Jones';
+
 
 -- (iii)
 SELECT f.location, COUNT(DISTINCT t.name) FROM Tastes t
