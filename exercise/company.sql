@@ -114,11 +114,9 @@ FROM Enrollments e
 JOIN ProjectSkills ps ON e.project_id = ps.project_id
 WHERE ps.skill IN ('HTML', 'Javascript', 'IOS')
 GROUP BY e.emp_id
-HAVING COUNT(DISTINCT ps.skill) = 3;
+HAVING COUNT(DISTINCT ps.skill) >= 3;
 
-
-
--- 3) Find the technologies in which a particular employee(Say B) has expertise(3 or more projects)
+-- 3) Find the technologies in which a particular employee(Say B) has expertise(2 or more projects)
 SELECT ps.skill FROM enrollments e
 LEFT JOIN projectskills ps ON e.project_id = ps.project_id
 WHERE emp_id = (SELECT id FROM Employees WHERE name = 'User A')
