@@ -94,12 +94,21 @@ VALUES
     (8, 'Android'),
     (9, 'IOS');
 
-
 -- View tables
 SELECT * FROM employees;
 SELECT * FROM projects;
 SELECT * FROM projectskills;
 SELECT * FROM enrollments;
+
+-- Creating indexes
+CREATE INDEX idx_enrollments_emp_id ON Enrollments(emp_id);
+CREATE INDEX idx_enrollments_project_id ON Enrollments(project_id);
+CREATE INDEX idx_projectskills_project_id ON ProjectSkills(project_id);
+
+CREATE INDEX idx_enrollments_status_ongoing
+ON Enrollments(status)
+WHERE status = 'ongoing';
+CREATE INDEX idx_projectskills_skill ON ProjectSkills(skill);
 
 -- 1) Find names of all employees currently not working in any projects. (Use joins)
 SELECT e.name
