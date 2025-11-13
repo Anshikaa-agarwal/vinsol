@@ -132,6 +132,12 @@ WHERE id = 1;
 DELETE FROM Articles
 WHERE id = 2;
 
+-- View tables
+SELECT * FROM Articles;
+SELECT * FROM Comments;
+SELECT * FROM Categories;
+SELECT * FROM Users;
+
 -- ii) select all articles whose author's name is user3
 
 SELECT 
@@ -144,13 +150,13 @@ WHERE u.name = 'User3';
 
 -- using variable
 -- \set author_name 'User3'
-SELECT 
-    a.*,
-    u.name AS author_name 
-FROM articles a
-INNER JOIN users u
-ON a.author_id = u.id
-WHERE u.name = :'author_name';
+-- SELECT 
+--     a.*,
+--     u.name AS author_name 
+-- FROM articles a
+-- INNER JOIN users u
+-- ON a.author_id = u.id
+-- WHERE u.name = :'author_name';
 
 -- iii) a)(Joins) For all the articles being selected above, select all the articles 
 -- and also the comments associated with those articles in a single query.
@@ -158,25 +164,28 @@ WHERE u.name = :'author_name';
 SELECT 
     a.id, 
     a.title, 
-    c.context
+    string_agg(c.context, ' , ')
 FROM articles a
 INNER JOIN users u ON a.author_id = u.id
 LEFT JOIN comments c ON c.article_id = A.id
-WHERE u.name = 'User3';
+WHERE u.name = 'User3'
+GROUP BY a.id;
 
 -- iii) b)(Subquery) For all the articles being selected above, select all the articles 
 -- and also the comments associated with those articles in a single query.
 
 SELECT
-    a.id, 
+    a.id,
     a.title,
     (
-        SELECT context FROM Comments c 
+        SELECT string_agg(c.context, ' , ')
+        FROM Comments c
         WHERE c.article_id = a.id
-        LIMIT 1
-    )
-FROM articles a 
-WHERE a.author_id = (SELECT id FROM Users WHERE name = 'User3');
+    ) AS all_comments
+FROM articles a
+WHERE a.author_id = (
+    SELECT id FROM Users WHERE name = 'User3'
+);
 
 -- iv) (Joins) Write a query to select all articles which do not have any comments
 SELECT DISTINCT * FROM Articles a
@@ -184,10 +193,15 @@ LEFT JOIN Comments c
 ON a.id = c.article_id
 WHERE c.id IS NULL;
 
+-- iv) another way
+SELECT id FROM Articles
+EXCEPT
+SELECT article_id FROM Comments;
+
 -- iv) (Subquery) Write a query to select all articles which do not have any comments
 SELECT DISTINCT * FROM articles
 WHERE id NOT IN (
-    SELECT article_id FROM comments
+    SELECT DISTINCT article_id FROM comments
 );
 
 -- v) (Joins) Write a query to select article which has maximum comments
